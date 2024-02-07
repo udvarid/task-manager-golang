@@ -1,0 +1,18 @@
+{{ template "header.html" .}}
+
+  <h1>Hello Gin!</h1>
+
+  {{range .tasks }}
+    
+    <a href="some_page">This is a regular link</a>
+
+    <form method="post" action="/delete/{{.ID}}" class="inline">
+      <button type="submit" name="submit_param" value="submit_value" class="link-button">
+        Delete it
+      </button>
+    </form>
+    
+    <p>{{.Task}}</p>
+  {{end}}
+
+{{ template "footer.html" .}}

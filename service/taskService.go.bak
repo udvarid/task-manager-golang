@@ -1,0 +1,19 @@
+package service
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	
+	"github.com/udvarid/task-manager-golang/model"
+)
+
+var taskList = []model.myTask{
+	model.myTask{ID: 1, Task: "Kaja készítés"},
+	model.myTask{ID: 2, Task: "Takarítés"},
+	model.myTask{ID: 3, Task: "Kutya sétáltatás"},
+}
+
+func getAllTasks() []model.myTask {
+	return taskList
+}
