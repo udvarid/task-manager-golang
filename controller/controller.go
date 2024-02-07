@@ -16,6 +16,8 @@ func Init() {
 
 	router.GET("/", startPage)
 	router.POST("/delete/:delete_id", deleteTask)
+	router.GET("/newTask/", newTask)
+	router.POST("/addTask/", addTask)
 	router.Run()
 }
 
@@ -32,4 +34,13 @@ func deleteTask(c *gin.Context) {
 		location := url.URL{Path: "/"}
 		c.Redirect(http.StatusFound, location.RequestURI())
 	}
+}
+
+func addTask(c *gin.Context) {
+	location := url.URL{Path: "/"}
+	c.Redirect(http.StatusFound, location.RequestURI())
+}
+
+func newTask(c *gin.Context) {
+	c.HTML(http.StatusOK, "addNew.html", gin.H{})
 }

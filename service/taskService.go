@@ -5,9 +5,9 @@ import (
 )
 
 var taskList = []model.MyTask{
-	model.MyTask{ID: 1, Task: "Kaja készítés"},
-	model.MyTask{ID: 2, Task: "Takarítés"},
-	model.MyTask{ID: 3, Task: "Kutya sétáltatás"},
+	{ID: 1, Task: "Kaja készítés", Owner: "donat1977"},
+	{ID: 2, Task: "Takarítás", Owner: "donat1977"},
+	{ID: 3, Task: "Kutya sétáltatás", Owner: "donat1977"},
 }
 
 func GetAllTasks() []model.MyTask {
