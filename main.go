@@ -1,9 +1,10 @@
 package main
 
 import (
-	controller "github.com/udvarid/task-manager-golang/controller"
+	"github.com/udvarid/task-manager-golang/configuration"
+	"github.com/udvarid/task-manager-golang/controller"
 )
 
 func main() {
-	controller.Init()
+	controller.Init(configuration.InitConfiguration())
 }
