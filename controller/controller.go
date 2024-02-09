@@ -1,12 +1,10 @@
 package controller
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
-
-	"net/smtp"
 
 	"github.com/gin-gonic/gin"
 
@@ -14,9 +12,16 @@ import (
 	"github.com/udvarid/task-manager-golang/service"
 )
 
-var activeConfiguration = configuration.Configuration{}
+var activeConfiguration = &configuration.Configuration{}
 
-func Init(config configuration.Configuration) {
+var user = "donat1977"
+
+type NewTask struct {
+	Task  string `json:"task"`
+	Owner string `json:"owner"`
+}
+
+func Init(config *configuration.Configuration) {
 	activeConfiguration = config
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
@@ -28,26 +33,32 @@ func Init(config configuration.Configuration) {
 	router.Run()
 }
 
+// TODO
+// 1, Kell egy kiinduló lap, ahol ntfy azonosítót vagy emailt adunk meg
+//    Azonosító megadása után egy random string generálódik és mentődik el egy map-ban (később db-ben)
+//    Ha nem local-ban vagyunk, akkor ntfy vagy email-el validálni kell, ezt később, ehhez kell valószínűleg a webhook
+// 2, Kell egy authentikációs service, ami generál, tárol és validál
+// 3, A task-os lista "/task" végponton legyen elérhető. Ide átadjuk a usernevet és a tokent is
+// 4, Delete-nél headerbe jöjjön vissza a usernév és a token, hogy tudjuk validálni
+// 5, Még nem tudom, hogy delete és new task után redirect-nél hogyan biztosítsuk, hogy user/token öröklést
+// 6, Kell egy logout oldal
+// 7, Db implementáció
+
 func startPage(c *gin.Context) {
-	myMail := "donat.udvari@gmail.com"
-	auth := smtp.PlainAuth("", myMail, activeConfiguration.Mail_psw, "smtp.gmail.com")
-	to := []string{"udvarid@hotmail.com"}
-	msg := []byte("To: kate.doe@example.com\r\n" +
-		"Subject: Why aren’t you using Mailtrap yet?\r\n" +
-		"\r\n" +
-		"Here’s the space for our great sales pitch\r\n")
-	err := smtp.SendMail("smtp.gmail.com:587", auth, myMail, to, msg)
-	if err != nil {
-		log.Fatal(err)
-	}
+	//  ezek majd az authentikációs service-be menjenek át
+	//  communicator.SendNtfy("donat1977", "hello-bello", "http://localhost:8080/")
+	//	communicator.SendMail(activeConfiguration, "udvarid@hotmail.com", []byte("Hello"))
+
+	// a megkapott user és token alapján authentikálni kell a user-t. Ha ok, akkor kiszoljáljuk
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"title": "Home Page",
-		"tasks": service.GetAllTasks(),
+		"tasks": service.GetAllTasks(user),
 	})
 }
 
 func deleteTask(c *gin.Context) {
 	if deleteId, err := strconv.Atoi(c.Param("delete_id")); err == nil {
+		// a megkapott user és token alapján authentikálni kell a user-t. Ha ok, akkor kiszoljáljuk
 		service.DeleteTask(int(deleteId))
 		location := url.URL{Path: "/"}
 		c.Redirect(http.StatusFound, location.RequestURI())
@@ -55,6 +66,12 @@ func deleteTask(c *gin.Context) {
 }
 
 func addTask(c *gin.Context) {
+	// itt kiszedjük az infókat ill. a username és token alapján authentikáljuk. ha okés, akkor kiszolgáljuk
+	var newTask NewTask
+	c.BindJSON(&newTask)
+	service.AddTask(newTask.Task, newTask.Owner)
+	mami := c.GetHeader("mami")
+	fmt.Println(mami)
 	location := url.URL{Path: "/"}
 	c.Redirect(http.StatusFound, location.RequestURI())
 }

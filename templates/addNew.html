@@ -1,8 +1,8 @@
 {{ template "header.html" .}}
 
 <form id="myForm">
-  <input type="text" name="name" id="name" placeholder="Name">
-  <input type="email" name="email" id="email" placeholder="Email">
+  <input type="text" name="task" id="task" placeholder="Task">
+  <input type="text" name="owner" id="owner" placeholder="donat1977">
   <button type="submit">Submit</button>
 </form>
 
@@ -12,8 +12,8 @@
   
     // Get form data
     const formData = {
-      name: document.getElementById("name").value,
-      email: document.getElementById("email").value
+      task: document.getElementById("task").value,
+      owner: document.getElementById("owner").value
     };
 
     // Convert form data to JSON
@@ -23,7 +23,8 @@
     fetch("/addTask/", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "mami": "mami-papi",
       },
       body: jsonData
     })

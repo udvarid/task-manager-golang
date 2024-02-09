@@ -2,29 +2,17 @@ package service
 
 import (
 	"github.com/udvarid/task-manager-golang/model"
+	"github.com/udvarid/task-manager-golang/repository"
 )
 
-var taskList = []model.MyTask{
-	{ID: 1, Task: "Kaja készítés", Owner: "donat1977"},
-	{ID: 2, Task: "Takarítás", Owner: "donat1977"},
-	{ID: 3, Task: "Kutya sétáltatás", Owner: "donat1977"},
-}
-
-func GetAllTasks() []model.MyTask {
-	return taskList
+func GetAllTasks(owner string) []model.MyTask {
+	return repository.GetAllTask(owner)
 }
 
 func DeleteTask(taskId int) {
-	if index := getIndexOfTask(taskId); index != -1 {
-		taskList = append(taskList[:index], taskList[index+1:]...)
-	}
+	repository.DeleteTask(taskId)
 }
 
-func getIndexOfTask(taskId int) int {
-	for i, t := range taskList {
-		if t.ID == taskId {
-			return i
-		}
-	}
-	return -1
+func AddTask(task string, owner string) {
+	repository.AddTask(task, owner)
 }
