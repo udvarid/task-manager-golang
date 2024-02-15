@@ -1,8 +1,8 @@
 {{ template "header.html" .}}
+{{ template "menu_new.html" . }}
 
 <form id="myForm">
   <input type="text" name="task" id="task" placeholder="Task">
-  <input type="text" name="owner" id="owner" placeholder="donat1977">
   <button type="submit">Submit</button>
 </form>
 
@@ -13,7 +13,6 @@
     // Get form data
     const formData = {
       task: document.getElementById("task").value,
-      owner: document.getElementById("owner").value
     };
 
     // Convert form data to JSON
@@ -24,7 +23,6 @@
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "mami": "mami-papi",
       },
       body: jsonData
     })
