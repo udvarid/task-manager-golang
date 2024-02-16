@@ -5,10 +5,12 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/udvarid/task-manager-golang/authenticator"
+	"github.com/udvarid/task-manager-golang/communicator"
 	"github.com/udvarid/task-manager-golang/configuration"
 	"github.com/udvarid/task-manager-golang/service"
 )
@@ -30,6 +32,7 @@ func Init(config *configuration.Configuration) {
 
 	router.GET("/", startPage)
 	router.POST("/validate/", validate)
+	router.GET("/checkin/:id/:session", checkInTask)
 	router.GET("/task/", taskPage)
 	router.POST("/delete/:delete_id", deleteTask)
 	router.GET("/newTask/", newTask)
@@ -38,9 +41,11 @@ func Init(config *configuration.Configuration) {
 }
 
 // TODO
-// 1, authentikáció megoldása (ez valószínűleg localon nem is tesztelhető, webhook kell hozzá)
 // 2, Db implementáció
-// 3, fly.io.n tesztelni
+// 3, Ha email címet ad meg (vmi email validáció alapján emailnek tűnik), akkor emailre küldjük
+// 5, task-oknál legyen határidő, másképp jelöljük, ami már lejárt
+// 6, fly.io-nál megoldani vhogy a scheduled futást és értesítést küldeni a lejárókról
+// 7, Kicsinosítani
 
 func startPage(c *gin.Context) {
 	c.SetCookie("id", "", -1, "/", "localhost", false, true)
@@ -53,20 +58,53 @@ func startPage(c *gin.Context) {
 func validate(c *gin.Context) {
 	var getSession GetSession
 	c.BindJSON(&getSession)
-
-	if activeConfiguration.Environment == "local" {
-		fmt.Println("Local environment, validation prcess skipped")
-	} else {
-		//  ezek majd az authentikációs service-be menjenek át
-		//  communicator.SendNtfy("donat1977", "hello-bello", "http://localhost:8080/")
-		//	communicator.SendMail(activeConfiguration, "udvarid@hotmail.com", []byte("Hello"))
-	}
-
 	newSession := authenticator.GiveSession(getSession.Id)
 
-	c.SetCookie("id", getSession.Id, 3600, "/", "localhost", false, true)
-	c.SetCookie("session", newSession, 3600, "/", "localhost", false, true)
-	redirectTo(c, "/task")
+	isValidatedInTime := false
+	if activeConfiguration.Environment == "local" {
+		fmt.Println("Local environment, validation prcess skipped")
+		isValidatedInTime = true
+	} else {
+		linkToSend := activeConfiguration.RemoteAddress + "checkin/" + getSession.Id + "/" + newSession
+		communicator.SendNtfy(getSession.Id, "CheckInPls!", linkToSend)
+		//msg := []byte("To: udvarid@hotmail.com\r\n" +
+		//	"Subject: Please check in!\r\n" +
+		//	"\r\n" +
+		//	"Here is the link\r\n" +
+		//	linkToSend)
+		//communicator.SendMail(activeConfiguration, "udvarid@hotmail.com", msg)
+		foundChecked := make(chan string)
+		timer := time.NewTimer(60 * time.Second)
+		go func() {
+			for {
+				time.Sleep(1 * time.Second)
+				isCheckedAlready := authenticator.IsChecked(getSession.Id, newSession)
+				if isCheckedAlready {
+					foundChecked <- "one"
+				}
+
+			}
+		}()
+		select {
+		case <-foundChecked:
+			fmt.Println("Id is validated")
+			isValidatedInTime = true
+		case <-timer.C:
+			fmt.Println("Id is not validated in time")
+		}
+	}
+	if isValidatedInTime {
+		c.SetCookie("id", getSession.Id, 3600, "/", activeConfiguration.RemoteAddress, false, true)
+		c.SetCookie("session", newSession, 3600, "/", activeConfiguration.RemoteAddress, false, true)
+		redirectTo(c, "/task")
+	} else {
+		redirectTo(c, "/")
+	}
+
+}
+
+func checkInTask(c *gin.Context) {
+	authenticator.CheckIn(c.Param("id"), c.Param("session"))
 }
 
 func taskPage(c *gin.Context) {
