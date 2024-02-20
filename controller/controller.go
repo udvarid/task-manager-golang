@@ -46,6 +46,7 @@ func Init(config *configuration.Configuration) {
 // 5, task-oknál legyen határidő, másképp jelöljük, ami már lejárt
 // 6, fly.io-nál megoldani vhogy a scheduled futást és értesítést küldeni a lejárókról
 // 7, Kicsinosítani
+// 8, Go embed feature-ét használni, a templatek és a conf.json file-ra
 
 func startPage(c *gin.Context) {
 	c.SetCookie("id", "", -1, "/", "localhost", false, true)

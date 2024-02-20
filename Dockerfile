@@ -1,12 +1,10 @@
-FROM golang:latest
+FROM ubuntu:latest
 
-COPY . .
+RUN apt update && apt install -y ca-certificates
 
-RUN go get -d -v ./...
-
-RUN go install -v ./...
-
-RUN go build .
+COPY task-manager-golang ./
+COPY conf.json ./
+COPY ./templates/*.html ./templates/
 
 EXPOSE 8080
 
