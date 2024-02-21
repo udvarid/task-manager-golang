@@ -13,9 +13,14 @@ import (
 	"github.com/udvarid/task-manager-golang/communicator"
 	"github.com/udvarid/task-manager-golang/configuration"
 	"github.com/udvarid/task-manager-golang/service"
+
+	emailverifier "github.com/AfterShip/email-verifier"
 )
 
-var activeConfiguration = &configuration.Configuration{}
+var (
+	verifier            = emailverifier.NewVerifier()
+	activeConfiguration = &configuration.Configuration{}
+)
 
 type NewTask struct {
 	Task string `json:"task"`
@@ -42,11 +47,12 @@ func Init(config *configuration.Configuration) {
 
 // TODO
 // 2, Db implementáció
-// 3, Ha email címet ad meg (vmi email validáció alapján emailnek tűnik), akkor emailre küldjük
 // 5, task-oknál legyen határidő, másképp jelöljük, ami már lejárt
-// 6, fly.io-nál megoldani vhogy a scheduled futást és értesítést küldeni a lejárókról
-// 7, Kicsinosítani
+// 6, a scheduled futtatás kapcsán a main-ből induljon el egy task, ami ellenőrzi az adatbázist, hogy van e lejáró
+// 7, Kicsinosítani a frontendet
 // 8, Go embed feature-ét használni, a templatek és a conf.json file-ra
+// 9. Lehessen taskot hosszabbítani 1 nap/1 héttel/1 hónappal (+1-1 gomb)
+// 10. Refactor: validálást külön servicebe helyezni, pl. AuthenticatorManager
 
 func startPage(c *gin.Context) {
 	c.SetCookie("id", "", -1, "/", "localhost", false, true)
@@ -67,13 +73,18 @@ func validate(c *gin.Context) {
 		isValidatedInTime = true
 	} else {
 		linkToSend := activeConfiguration.RemoteAddress + "checkin/" + getSession.Id + "/" + newSession
-		communicator.SendNtfy(getSession.Id, "CheckInPls!", linkToSend)
-		//msg := []byte("To: udvarid@hotmail.com\r\n" +
-		//	"Subject: Please check in!\r\n" +
-		//	"\r\n" +
-		//	"Here is the link\r\n" +
-		//	linkToSend)
-		//communicator.SendMail(activeConfiguration, "udvarid@hotmail.com", msg)
+		ret, err := verifier.Verify(getSession.Id)
+		if err != nil || !ret.Syntax.Valid {
+			communicator.SendNtfy(getSession.Id, "CheckInPls!", linkToSend)
+		} else {
+			msg := []byte("To: " + getSession.Id + "\r\n" +
+				"Subject: Please check in!\r\n" +
+				"\r\n" +
+				"Here is the link\r\n" +
+				linkToSend)
+			communicator.SendMail(activeConfiguration, getSession.Id, msg)
+		}
+
 		foundChecked := make(chan string)
 		timer := time.NewTimer(60 * time.Second)
 		go func() {

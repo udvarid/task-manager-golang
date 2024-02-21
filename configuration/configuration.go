@@ -21,7 +21,6 @@ func InitConfiguration(configFile string) Configuration {
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 	err := decoder.Decode(&configuration)
-	fmt.Println(configuration)
 	if err != nil {
 		fmt.Println("error:", err)
 	}

@@ -2,3 +2,4 @@ conf.json
 fly.toml
 
 *.exe
+task-manager-golang
