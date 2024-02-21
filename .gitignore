@@ -3,3 +3,4 @@ fly.toml
 
 *.exe
 task-manager-golang
+my.db

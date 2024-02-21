@@ -5,6 +5,7 @@ go 1.21.6
 require (
 	github.com/AfterShip/email-verifier v1.4.0
 	github.com/gin-gonic/gin v1.9.1
+	go.etcd.io/bbolt v1.3.8
 )
 
 require (

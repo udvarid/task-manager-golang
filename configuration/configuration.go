@@ -12,6 +12,7 @@ type Configuration struct {
 	FlyIo         string `json:"flyIo"`
 	Environment   string `json:"environment"`
 	RemoteAddress string `json:"remote_address"`
+	DbName        string `json:"db_name"`
 }
 
 var configuration = Configuration{}
