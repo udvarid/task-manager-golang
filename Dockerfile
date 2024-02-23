@@ -5,6 +5,7 @@ RUN apt update && apt install -y ca-certificates
 COPY task-manager-golang ./
 COPY conf.json ./
 COPY ./templates/*.html ./templates/
+RUN mkdir /db
 
 EXPOSE 8080
 

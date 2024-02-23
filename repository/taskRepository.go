@@ -1,27 +1,21 @@
 package repository
 
 import (
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
 	bolt "go.etcd.io/bbolt"
 
-	"github.com/udvarid/task-manager-golang/configuration"
 	"github.com/udvarid/task-manager-golang/model"
 )
 
-var taskList = []model.MyTask{
-	{ID: 1, Task: "Kaja készítés", Owner: "donat1977"},
-	{ID: 2, Task: "Takarítás", Owner: "donat1977"},
-	{ID: 3, Task: "Kutya sétáltatás", Owner: "donat1977"},
-}
+var taskList = []model.MyTask{}
 
-func Init(config *configuration.Configuration) {
-	db, err := bolt.Open(config.DbName, 0600, &bolt.Options{Timeout: 1 * time.Second})
-	if err != nil {
-		log.Fatal(err)
-	}
+func Init() {
+	db := openDb()
 	db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte("Sessions"))
 		if err != nil {
@@ -39,50 +33,66 @@ func Init(config *configuration.Configuration) {
 	defer db.Close()
 }
 
-// this is how to cast []byte to struct https://stackoverflow.com/questions/31529071/golang-casting-byte-array-to-struct
-
 func GetAllTask(owner string) []model.MyTask {
+	db := openDb()
 	var result []model.MyTask
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Tasks"))
 
-	for _, task := range taskList {
-		if task.Owner == owner {
-			result = append(result, task)
-		}
-	}
+		b.ForEach(func(k, v []byte) error {
+			var task model.MyTask
+			json.Unmarshal([]byte(v), &task)
+			if task.Owner == owner {
+				result = append(result, task)
+			}
+			return nil
+		})
+		return nil
+	})
+	defer db.Close()
 
 	return result
 }
 
 func DeleteTask(taskId int) {
-	if index := getIndexOfTask(taskId); index != -1 {
-		taskList = append(taskList[:index], taskList[index+1:]...)
-	}
-}
+	db := openDb()
 
-func getIndexOfTask(taskId int) int {
-	for i, t := range taskList {
-		if t.ID == taskId {
-			return i
-		}
-	}
-	return -1
+	db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Tasks"))
+		err := b.Delete(itob(taskId))
+		return err
+	})
+	defer db.Close()
 }
 
 func AddTask(task string, owner string) {
-	newTask := model.MyTask{
-		ID:    findNextId(),
-		Task:  task,
-		Owner: owner,
-	}
+	db := openDb()
+	newTask := model.MyTask{Task: task, Owner: owner}
+	db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Tasks"))
+		id, _ := b.NextSequence()
+		newTask.ID = int(id)
+		buf, err := json.Marshal(newTask)
+		if err != nil {
+			return err
+		}
+		return b.Put(itob(newTask.ID), buf)
+	})
+
+	defer db.Close()
 	taskList = append(taskList, newTask)
 }
 
-func findNextId() int {
-	maxId := 0
-	for _, task := range taskList {
-		if maxId < task.ID {
-			maxId = task.ID
-		}
+func itob(v int) []byte {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, uint64(v))
+	return b
+}
+
+func openDb() *bolt.DB {
+	db, err := bolt.Open("./db/my.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
+	if err != nil {
+		log.Fatal(err)
 	}
-	return maxId + 1
+	return db
 }

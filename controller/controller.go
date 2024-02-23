@@ -46,13 +46,13 @@ func Init(config *configuration.Configuration) {
 }
 
 // TODO
-// 2, Db implementáció
-// 5, task-oknál legyen határidő, másképp jelöljük, ami már lejárt
-// 6, a scheduled futtatás kapcsán a main-ből induljon el egy task, ami ellenőrzi az adatbázist, hogy van e lejáró
+// 1, Db implementáció sessoin-re -> legyen külön repository, de itt legyen caching, azaz ha nincs a memóriába, akkor nézzünk a db-be, ill. törlésnél memóriából és db-ből is
+// 2, task-oknál legyen határidő, másképp jelöljük, ami már lejárt
+// 3, a scheduled futtatás kapcsán a main-ből induljon el egy task, ami ellenőrzi az adatbázist, hogy van e lejáró
+// 4. Lehessen taskot hosszabbítani 1 nap/1 héttel/1 hónappal (+1-1 gomb)
+// 5, Go embed feature-ét használni, a templatek és a conf.json file-ra
+// 6. Refactor: Belépéskori validálást áthelyezni az authentikátorba
 // 7, Kicsinosítani a frontendet
-// 8, Go embed feature-ét használni, a templatek és a conf.json file-ra
-// 9. Lehessen taskot hosszabbítani 1 nap/1 héttel/1 hónappal (+1-1 gomb)
-// 10. Refactor: validálást külön servicebe helyezni, pl. AuthenticatorManager
 
 func startPage(c *gin.Context) {
 	c.SetCookie("id", "", -1, "/", "localhost", false, true)
@@ -166,11 +166,9 @@ func validateSession(c *gin.Context) string {
 	if isMissingCookie {
 		redirectTo(c, "/")
 	}
-
 	isValid := authenticator.IsValid(id_cookie, session_cookie)
 	if !isValid {
 		redirectTo(c, "/")
 	}
-
 	return id_cookie
 }
