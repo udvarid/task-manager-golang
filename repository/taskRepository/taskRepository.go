@@ -1,21 +1,17 @@
-package repository
+package taskRepository
 
 import (
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"log"
-	"time"
 
 	bolt "go.etcd.io/bbolt"
 
 	"github.com/udvarid/task-manager-golang/model"
+	"github.com/udvarid/task-manager-golang/repository/repoUtil"
 )
 
-var taskList = []model.MyTask{}
-
 func Init() {
-	db := openDb()
+	db := repoUtil.OpenDb()
 	db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte("Sessions"))
 		if err != nil {
@@ -34,7 +30,7 @@ func Init() {
 }
 
 func GetAllTask(owner string) []model.MyTask {
-	db := openDb()
+	db := repoUtil.OpenDb()
 	var result []model.MyTask
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Tasks"))
@@ -55,18 +51,18 @@ func GetAllTask(owner string) []model.MyTask {
 }
 
 func DeleteTask(taskId int) {
-	db := openDb()
+	db := repoUtil.OpenDb()
 
 	db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Tasks"))
-		err := b.Delete(itob(taskId))
+		err := b.Delete(repoUtil.Itob(taskId))
 		return err
 	})
 	defer db.Close()
 }
 
 func AddTask(task string, owner string) {
-	db := openDb()
+	db := repoUtil.OpenDb()
 	newTask := model.MyTask{Task: task, Owner: owner}
 	db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Tasks"))
@@ -76,23 +72,8 @@ func AddTask(task string, owner string) {
 		if err != nil {
 			return err
 		}
-		return b.Put(itob(newTask.ID), buf)
+		return b.Put(repoUtil.Itob(newTask.ID), buf)
 	})
 
 	defer db.Close()
-	taskList = append(taskList, newTask)
-}
-
-func itob(v int) []byte {
-	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(v))
-	return b
-}
-
-func openDb() *bolt.DB {
-	db, err := bolt.Open("./db/my.db", 0600, &bolt.Options{Timeout: 1 * time.Second})
-	if err != nil {
-		log.Fatal(err)
-	}
-	return db
 }

@@ -3,56 +3,76 @@ package authenticator
 import (
 	"math/rand"
 	"time"
+
+	"github.com/udvarid/task-manager-golang/model"
+	"github.com/udvarid/task-manager-golang/repository/sessionRepository"
 )
 
-type SessionWithTime struct {
-	session   string
-	sessDate  time.Time
-	isChecked bool
-}
-
-var sessions = make(map[string]SessionWithTime)
+var sessions = make(map[string]model.SessionWithTime)
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func IsValid(id string, session string) bool {
 	sessionInMap, isPresent := sessions[id]
 	if !isPresent {
-		return false
+		sessionInDb, err := sessionRepository.FindSession(id)
+		if err == nil {
+			sessions[id] = sessionInDb
+			sessionInMap = sessionInDb
+		} else {
+			return false
+		}
 	}
 	now := time.Now()
-	diff := now.Sub(sessionInMap.sessDate)
+	diff := now.Sub(sessionInMap.SessDate)
 	if diff.Minutes() > 30 {
 		delete(sessions, id)
+		sessionRepository.DeleteSession((id))
 		return false
 	}
-	return sessionInMap.session == session
+	return sessionInMap.Session == session
 }
 
 func IsChecked(id string, session string) bool {
 	sessionInMap, isPresent := sessions[id]
 	if !isPresent {
-		return false
+		sessionInDb, err := sessionRepository.FindSession(id)
+		if err == nil {
+			sessions[id] = sessionInDb
+			sessionInMap = sessionInDb
+		} else {
+			return false
+		}
+
 	}
-	return sessionInMap.session == session && sessionInMap.isChecked
+	return sessionInMap.Session == session && sessionInMap.IsChecked
 }
 
 func CheckIn(id string, session string) {
 	sessionInMap, isPresent := sessions[id]
 	if isPresent {
-		sessionInMap.isChecked = true
+		sessionInMap.IsChecked = true
 		sessions[id] = sessionInMap
+		sessionRepository.AddSession(id, sessionInMap)
+	} else {
+		sessionInDb, err := sessionRepository.FindSession(id)
+		if err == nil {
+			sessionInDb.IsChecked = true
+			sessions[id] = sessionInDb
+			sessionRepository.AddSession(id, sessionInDb)
+		}
 	}
 }
 
 func GiveSession(id string) string {
 	sessionGenerated := randStringBytes(50)
-	sess := SessionWithTime{
-		session:   sessionGenerated,
-		sessDate:  time.Now(),
-		isChecked: false,
+	sess := model.SessionWithTime{
+		Session:   sessionGenerated,
+		SessDate:  time.Now(),
+		IsChecked: false,
 	}
 	sessions[id] = sess
+	sessionRepository.AddSession(id, sess)
 	return sessionGenerated
 }
 

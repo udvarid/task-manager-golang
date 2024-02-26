@@ -5,7 +5,7 @@ import (
 
 	"github.com/udvarid/task-manager-golang/configuration"
 	"github.com/udvarid/task-manager-golang/controller"
-	"github.com/udvarid/task-manager-golang/repository"
+	"github.com/udvarid/task-manager-golang/repository/taskRepository"
 )
 
 var config = configuration.Configuration{}
@@ -20,7 +20,7 @@ func main() {
 	config = configuration.InitConfiguration(*configFile)
 	config.Environment = *environment
 	config.RemoteAddress = *remoteAddress
-	repository.Init()
+	taskRepository.Init()
 
 	controller.Init(&config)
 }
