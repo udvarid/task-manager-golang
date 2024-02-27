@@ -3,6 +3,8 @@ package taskRepository
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"time"
 
 	bolt "go.etcd.io/bbolt"
 
@@ -61,9 +63,13 @@ func DeleteTask(taskId int) {
 	defer db.Close()
 }
 
-func AddTask(task string, owner string) {
+func AddTask(task model.NewTask, owner string) {
 	db := repoUtil.OpenDb()
-	newTask := model.MyTask{Task: task, Owner: owner}
+	deadline, err := time.Parse("2006-01-02", task.Deadline)
+	if err != nil {
+		log.Fatal("Not proper date format")
+	}
+	newTask := model.MyTask{Task: task.Task, Deadline: deadline, Owner: owner}
 	db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Tasks"))
 		id, _ := b.NextSequence()

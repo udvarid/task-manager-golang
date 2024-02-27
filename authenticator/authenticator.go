@@ -1,6 +1,7 @@
 package authenticator
 
 import (
+	"errors"
 	"math/rand"
 	"time"
 
@@ -64,7 +65,10 @@ func CheckIn(id string, session string) {
 	}
 }
 
-func GiveSession(id string) string {
+func GiveSession(id string) (string, error) {
+	if len(id) == 0 {
+		return "", errors.New("empty id")
+	}
 	sessionGenerated := randStringBytes(50)
 	sess := model.SessionWithTime{
 		Session:   sessionGenerated,
@@ -73,7 +77,7 @@ func GiveSession(id string) string {
 	}
 	sessions[id] = sess
 	sessionRepository.AddSession(id, sess)
-	return sessionGenerated
+	return sessionGenerated, nil
 }
 
 func randStringBytes(n int) string {

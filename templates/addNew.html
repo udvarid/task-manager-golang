@@ -2,7 +2,8 @@
 {{ template "menu_new.html" . }}
 
 <form id="myForm">
-  <input type="text" name="task" id="task" placeholder="Task">
+  <input type="text" name="task" id="task" required="required" placeholder="Task">
+  <input type="date" name="deadline" id="deadline" value="2030-01-01">
   <button type="submit">Submit</button>
 </form>
 
@@ -13,6 +14,7 @@
     // Get form data
     const formData = {
       task: document.getElementById("task").value,
+      deadline: document.getElementById("deadline").value,
     };
 
     // Convert form data to JSON

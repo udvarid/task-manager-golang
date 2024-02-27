@@ -12,6 +12,7 @@ import (
 	"github.com/udvarid/task-manager-golang/authenticator"
 	"github.com/udvarid/task-manager-golang/communicator"
 	"github.com/udvarid/task-manager-golang/configuration"
+	"github.com/udvarid/task-manager-golang/model"
 	"github.com/udvarid/task-manager-golang/service"
 
 	emailverifier "github.com/AfterShip/email-verifier"
@@ -21,10 +22,6 @@ var (
 	verifier            = emailverifier.NewVerifier()
 	activeConfiguration = &configuration.Configuration{}
 )
-
-type NewTask struct {
-	Task string `json:"task"`
-}
 
 type GetSession struct {
 	Id string `json:"id"`
@@ -46,7 +43,6 @@ func Init(config *configuration.Configuration) {
 }
 
 // TODO
-// 2, task-oknál legyen határidő, másképp jelöljük, ami már lejárt
 // 3, a scheduled futtatás kapcsán a main-ből induljon el egy task, ami ellenőrzi az adatbázist, hogy van e lejáró
 // 4. Lehessen taskot hosszabbítani 1 nap/1 héttel/1 hónappal (+1-1 gomb)
 // 5, Go embed feature-ét használni, a templatek és a conf.json file-ra
@@ -65,11 +61,14 @@ func startPage(c *gin.Context) {
 func validate(c *gin.Context) {
 	var getSession GetSession
 	c.BindJSON(&getSession)
-	newSession := authenticator.GiveSession(getSession.Id)
+	newSession, err := authenticator.GiveSession(getSession.Id)
+	if err != nil {
+		redirectTo(c, "/")
+	}
 
 	isValidatedInTime := false
 	if activeConfiguration.Environment == "local" {
-		fmt.Println("Local environment, validation prcess skipped")
+		fmt.Println("Local environment, validation process skipped")
 		isValidatedInTime = true
 	} else {
 		linkToSend := activeConfiguration.RemoteAddress + "checkin/" + getSession.Id + "/" + newSession
@@ -121,9 +120,11 @@ func checkInTask(c *gin.Context) {
 
 func taskPage(c *gin.Context) {
 	id := validateSession(c)
+	overDue, normal := service.GetAllTasks(id)
 	c.HTML(http.StatusOK, "index.html", gin.H{
-		"title": "Home Page",
-		"tasks": service.GetAllTasks(id),
+		"title":  "Home Page",
+		"tasksO": overDue,
+		"tasksN": normal,
 	})
 }
 
@@ -136,10 +137,10 @@ func deleteTask(c *gin.Context) {
 }
 
 func addTask(c *gin.Context) {
-	var newTask NewTask
+	var newTask model.NewTask
 	c.BindJSON(&newTask)
 	id := validateSession(c)
-	service.AddTask(newTask.Task, id)
+	service.AddTask(newTask, id)
 	redirectTo(c, "/task")
 }
 

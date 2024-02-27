@@ -3,12 +3,14 @@
 
   <h1>Your tasks!</h1>
 
-  {{range .tasks }}
+  <a>---------------------------Deadline reached!!!!!------------------------------------------------------</a>
+  {{range .tasksO }}
 
     <div>
       
       <form method="post" action="/delete/{{.ID}}" class="inline">
         <a>{{.Task}}</a>
+        <a>{{.DeadLStr}}</a>
         <button type="submit" name="submit_param" value="submit_value" class="link-button">
           Delete it
         </button>
@@ -18,4 +20,22 @@
     
   {{end}}
 
+  <a>---------------------------Before deadline-------------------------------------------------------------</a>
+
+
+  {{range .tasksN }}
+
+    <div>
+      
+      <form method="post" action="/delete/{{.ID}}" class="inline">
+        <a>{{.Task}}</a>
+        <a>{{.DeadLStr}}</a>
+        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+          Delete it
+        </button>
+      </form>  
+    </div>
+    
+    
+  {{end}}
 {{ template "footer.html" .}}
