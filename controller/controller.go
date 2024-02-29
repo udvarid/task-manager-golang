@@ -43,7 +43,7 @@ func Init(config *configuration.Configuration) {
 }
 
 // TODO
-// 3, a scheduled futtatás kapcsán a main-ből induljon el egy task, ami ellenőrzi az adatbázist, hogy van e lejáró
+// 3. A messenger döntse el, hogy hova (ntfy/mail) küldi az üzenetet, a controller ill. initjob csak az Id és a messaget adja
 // 4. Lehessen taskot hosszabbítani 1 nap/1 héttel/1 hónappal (+1-1 gomb)
 // 5, Go embed feature-ét használni, a templatek és a conf.json file-ra
 // 6. Refactor: Belépéskori validálást áthelyezni az authentikátorba

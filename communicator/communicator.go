@@ -22,3 +22,11 @@ func SendNtfy(channel string, msg string, address string) {
 	req.Header.Set("Actions", "http, Confirm!, "+address+", method=GET")
 	http.DefaultClient.Do(req)
 }
+
+func SendNtfyMessage(channel string, msg string) {
+	req, _ := http.NewRequest("POST", "https://ntfy.sh/"+channel, strings.NewReader(msg))
+	req.Header.Set("Title", "Overdue task")
+	req.Header.Set("Priority", "urgent")
+	req.Header.Set("Tags", "warning,skull")
+	http.DefaultClient.Do(req)
+}

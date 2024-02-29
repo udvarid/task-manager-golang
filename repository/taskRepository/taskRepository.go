@@ -40,7 +40,7 @@ func GetAllTask(owner string) []model.MyTask {
 		b.ForEach(func(k, v []byte) error {
 			var task model.MyTask
 			json.Unmarshal([]byte(v), &task)
-			if task.Owner == owner {
+			if len(owner) > 0 && task.Owner == owner || len(owner) == 0 {
 				result = append(result, task)
 			}
 			return nil

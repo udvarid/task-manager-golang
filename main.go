@@ -5,6 +5,7 @@ import (
 
 	"github.com/udvarid/task-manager-golang/configuration"
 	"github.com/udvarid/task-manager-golang/controller"
+	"github.com/udvarid/task-manager-golang/initJob"
 	"github.com/udvarid/task-manager-golang/repository/taskRepository"
 )
 
@@ -21,6 +22,8 @@ func main() {
 	config.Environment = *environment
 	config.RemoteAddress = *remoteAddress
 	taskRepository.Init()
+
+	initJob.DoInitJob(&config)
 
 	controller.Init(&config)
 }
