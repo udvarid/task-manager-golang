@@ -14,12 +14,9 @@ import (
 	"github.com/udvarid/task-manager-golang/configuration"
 	"github.com/udvarid/task-manager-golang/model"
 	"github.com/udvarid/task-manager-golang/service"
-
-	emailverifier "github.com/AfterShip/email-verifier"
 )
 
 var (
-	verifier            = emailverifier.NewVerifier()
 	activeConfiguration = &configuration.Configuration{}
 )
 
@@ -43,7 +40,6 @@ func Init(config *configuration.Configuration) {
 }
 
 // TODO
-// 3. A messenger döntse el, hogy hova (ntfy/mail) küldi az üzenetet, a controller ill. initjob csak az Id és a messaget adja
 // 4. Lehessen taskot hosszabbítani 1 nap/1 héttel/1 hónappal (+1-1 gomb)
 // 5, Go embed feature-ét használni, a templatek és a conf.json file-ra
 // 6. Refactor: Belépéskori validálást áthelyezni az authentikátorba
@@ -72,17 +68,7 @@ func validate(c *gin.Context) {
 		isValidatedInTime = true
 	} else {
 		linkToSend := activeConfiguration.RemoteAddress + "checkin/" + getSession.Id + "/" + newSession
-		ret, err := verifier.Verify(getSession.Id)
-		if err != nil || !ret.Syntax.Valid {
-			communicator.SendNtfy(getSession.Id, "CheckInPls!", linkToSend)
-		} else {
-			msg := []byte("To: " + getSession.Id + "\r\n" +
-				"Subject: Please check in!\r\n" +
-				"\r\n" +
-				"Here is the link\r\n" +
-				linkToSend)
-			communicator.SendMail(activeConfiguration, getSession.Id, msg)
-		}
+		communicator.SendMessageWithLink(activeConfiguration, getSession.Id, linkToSend)
 
 		foundChecked := make(chan string)
 		timer := time.NewTimer(60 * time.Second)
