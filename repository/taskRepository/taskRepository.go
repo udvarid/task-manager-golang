@@ -63,6 +63,37 @@ func DeleteTask(taskId int) {
 	defer db.Close()
 }
 
+func GetTask(taskId int) model.MyTask {
+	db := repoUtil.OpenDb()
+
+	var result model.MyTask
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Tasks"))
+		v := b.Get(repoUtil.Itob(taskId))
+		if v != nil {
+			var task model.MyTask
+			json.Unmarshal([]byte(v), &task)
+			result = task
+		}
+		return nil
+	})
+	defer db.Close()
+	return result
+}
+
+func UpdateTask(taskId int, task model.MyTask) {
+	db := repoUtil.OpenDb()
+	db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Tasks"))
+		buf, err := json.Marshal(task)
+		if err != nil {
+			return err
+		}
+		return b.Put(repoUtil.Itob(taskId), buf)
+	})
+	defer db.Close()
+}
+
 func AddTask(task model.NewTask, owner string) {
 	db := repoUtil.OpenDb()
 	deadline, err := time.Parse("2006-01-02", task.Deadline)

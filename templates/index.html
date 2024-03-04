@@ -9,10 +9,25 @@
   {{range .tasksO }}
 
     <div>
-      
+
+      <a>{{.Task}}</a>
+      <a>{{.DeadLStr}}</a>        
+      <form method="post" action="/prolong/{{.ID}}/1" class="inline">
+        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+          Prolong with 1 day
+        </button>
+      </form>  
+      <form method="post" action="/prolong/{{.ID}}/7" class="inline">
+        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+          Prolong with 7 days
+        </button>
+      </form>  
+      <form method="post" action="/prolong/{{.ID}}/30" class="inline">
+        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+          Prolong with 30 days
+        </button>
+      </form>  
       <form method="post" action="/delete/{{.ID}}" class="inline">
-        <a>{{.Task}}</a>
-        <a>{{.DeadLStr}}</a>
         <button type="submit" name="submit_param" value="submit_value" class="link-button">
           Delete it
         </button>
@@ -29,10 +44,25 @@
   {{range .tasksN }}
 
     <div>
-      
+
+      <a>{{.Task}}</a>
+      <a>{{.DeadLStr}}</a>    
+      <form method="post" action="/prolong/{{.ID}}/1" class="inline">
+        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+          Prolong with 1 day
+        </button>
+      </form>  
+      <form method="post" action="/prolong/{{.ID}}/7" class="inline">
+        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+          Prolong with 7 days
+        </button>
+      </form>  
+      <form method="post" action="/prolong/{{.ID}}/30" class="inline">
+        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+          Prolong with 30 days
+        </button>
+      </form>  
       <form method="post" action="/delete/{{.ID}}" class="inline">
-        <a>{{.Task}}</a>
-        <a>{{.DeadLStr}}</a>
         <button type="submit" name="submit_param" value="submit_value" class="link-button">
           Delete it
         </button>

@@ -34,13 +34,13 @@ func Init(config *configuration.Configuration) {
 	router.GET("/checkin/:id/:session", checkInTask)
 	router.GET("/task/", taskPage)
 	router.POST("/delete/:delete_id", deleteTask)
+	router.POST("/prolong/:id/:prolong_days", prolongTask)
 	router.GET("/newTask/", newTask)
 	router.POST("/addTask/", addTask)
 	router.Run()
 }
 
 // TODO
-// 4. Lehessen taskot hosszabbítani 1 nap/1 héttel/1 hónappal (+1-1 gomb)
 // 5, Go embed feature-ét használni, a templatek és a conf.json file-ra
 // 6. Refactor: Belépéskori validálást áthelyezni az authentikátorba
 // 7, Kicsinosítani a frontendet
@@ -116,9 +116,19 @@ func taskPage(c *gin.Context) {
 
 func deleteTask(c *gin.Context) {
 	if deleteId, err := strconv.Atoi(c.Param("delete_id")); err == nil {
-		validateSession(c)
-		service.DeleteTask(int(deleteId))
+		owner := validateSession(c)
+		service.DeleteTask(deleteId, owner)
 		redirectTo(c, "/task")
+	}
+}
+
+func prolongTask(c *gin.Context) {
+	if id, err := strconv.Atoi(c.Param("id")); err == nil {
+		if prolong_days, err := strconv.Atoi(c.Param("prolong_days")); err == nil {
+			owner := validateSession(c)
+			service.ProlongTask(id, prolong_days, owner)
+			redirectTo(c, "/task")
+		}
 	}
 }
 

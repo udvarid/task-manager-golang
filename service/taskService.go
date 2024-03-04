@@ -42,8 +42,23 @@ func GetAllTasks(owner string) ([]model.MyTaskDto, []model.MyTaskDto) {
 	return taskDtosOverDue, taskDtosNormal
 }
 
-func DeleteTask(taskId int) {
-	taskRepository.DeleteTask(taskId)
+func DeleteTask(taskId int, owner string) {
+	myTask := taskRepository.GetTask(taskId)
+	if myTask.Owner == owner {
+		taskRepository.DeleteTask(taskId)
+	}
+
+}
+
+func ProlongTask(taskId int, prolongDays int, owner string) {
+	if prolongDays > 0 {
+		myTask := taskRepository.GetTask(taskId)
+		if myTask.Owner == owner {
+			prolongedDeadLine := myTask.Deadline.AddDate(0, 0, prolongDays)
+			myTask.Deadline = prolongedDeadLine
+			taskRepository.UpdateTask(taskId, myTask)
+		}
+	}
 }
 
 func AddTask(task model.NewTask, owner string) {
