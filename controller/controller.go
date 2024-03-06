@@ -1,16 +1,13 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/udvarid/task-manager-golang/authenticator"
-	"github.com/udvarid/task-manager-golang/communicator"
 	"github.com/udvarid/task-manager-golang/configuration"
 	"github.com/udvarid/task-manager-golang/model"
 	"github.com/udvarid/task-manager-golang/service"
@@ -41,10 +38,10 @@ func Init(config *configuration.Configuration) {
 }
 
 // TODO
-// 5, Go embed feature-ét használni, a templatek és a conf.json file-ra
-// 6. Refactor: Belépéskori validálást áthelyezni az authentikátorba
-// 7, Kicsinosítani a frontendet
-// 8, Fly-on tesztelni a mount-ot és a scheduled futtatás
+// 1, Fly-on tesztelni a mount-ot és a scheduled futtatás
+// 2, Kicsinosítani a frontendet
+// 3, Go embed feature-ét használni, a templatek és a conf.json file-ra
+// 4, QR code possibility at login?
 
 func startPage(c *gin.Context) {
 	c.SetCookie("id", "", -1, "/", "localhost", false, true)
@@ -62,34 +59,8 @@ func validate(c *gin.Context) {
 		redirectTo(c, "/")
 	}
 
-	isValidatedInTime := false
-	if activeConfiguration.Environment == "local" {
-		fmt.Println("Local environment, validation process skipped")
-		isValidatedInTime = true
-	} else {
-		linkToSend := activeConfiguration.RemoteAddress + "checkin/" + getSession.Id + "/" + newSession
-		communicator.SendMessageWithLink(activeConfiguration, getSession.Id, linkToSend)
+	isValidatedInTime := authenticator.Validate(activeConfiguration, getSession.Id, newSession)
 
-		foundChecked := make(chan string)
-		timer := time.NewTimer(60 * time.Second)
-		go func() {
-			for {
-				time.Sleep(1 * time.Second)
-				isCheckedAlready := authenticator.IsChecked(getSession.Id, newSession)
-				if isCheckedAlready {
-					foundChecked <- "one"
-				}
-
-			}
-		}()
-		select {
-		case <-foundChecked:
-			fmt.Println("Id is validated")
-			isValidatedInTime = true
-		case <-timer.C:
-			fmt.Println("Id is not validated in time")
-		}
-	}
 	if isValidatedInTime {
 		c.SetCookie("id", getSession.Id, 3600, "/", activeConfiguration.RemoteAddress, false, true)
 		c.SetCookie("session", newSession, 3600, "/", activeConfiguration.RemoteAddress, false, true)
