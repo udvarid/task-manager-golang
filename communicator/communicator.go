@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	emailverifier "github.com/AfterShip/email-verifier"
-	"github.com/udvarid/task-manager-golang/configuration"
+	"github.com/udvarid/task-manager-golang/model"
 )
 
 var verifier = emailverifier.NewVerifier()
 
-func SendMessageWithLink(config *configuration.Configuration, toAddress string, toLink string) {
+func SendMessageWithLink(config *model.Configuration, toAddress string, toLink string) {
 	ret, err := verifier.Verify(toAddress)
 	if err != nil || !ret.Syntax.Valid {
 		sendNtfy(toAddress, "CheckInPls!", toLink)
@@ -26,7 +26,7 @@ func SendMessageWithLink(config *configuration.Configuration, toAddress string, 
 	}
 }
 
-func SendMessage(config *configuration.Configuration, toAddress string, task string) {
+func SendMessage(config *model.Configuration, toAddress string, task string) {
 	ret, err := verifier.Verify(toAddress)
 	if err != nil || !ret.Syntax.Valid {
 		sendNtfyMessage(toAddress, "Overdue: "+task)
@@ -39,7 +39,7 @@ func SendMessage(config *configuration.Configuration, toAddress string, task str
 	}
 }
 
-func sendMail(config *configuration.Configuration, toAddress string, message []byte) {
+func sendMail(config *model.Configuration, toAddress string, message []byte) {
 	auth := smtp.PlainAuth("", config.Mail_from, config.Mail_psw, "smtp.gmail.com")
 	err := smtp.SendMail("smtp.gmail.com:587", auth, config.Mail_from, []string{toAddress}, message)
 	if err != nil {

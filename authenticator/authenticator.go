@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/udvarid/task-manager-golang/communicator"
-	"github.com/udvarid/task-manager-golang/configuration"
 	"github.com/udvarid/task-manager-golang/model"
 	"github.com/udvarid/task-manager-golang/repository/sessionRepository"
 )
@@ -68,7 +67,7 @@ func GiveSession(id string) (string, error) {
 	return sessionGenerated, nil
 }
 
-func Validate(activeConfiguration *configuration.Configuration, id string, session string) bool {
+func Validate(activeConfiguration *model.Configuration, id string, session string) bool {
 	isValidatedInTime := false
 	if activeConfiguration.Environment == "local" {
 		fmt.Println("Local environment, validation process skipped")

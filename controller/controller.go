@@ -8,20 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/udvarid/task-manager-golang/authenticator"
-	"github.com/udvarid/task-manager-golang/configuration"
 	"github.com/udvarid/task-manager-golang/model"
 	"github.com/udvarid/task-manager-golang/service"
 )
 
 var (
-	activeConfiguration = &configuration.Configuration{}
+	activeConfiguration = &model.Configuration{}
 )
 
 type GetSession struct {
 	Id string `json:"id"`
 }
 
-func Init(config *configuration.Configuration) {
+func Init(config *model.Configuration) {
 	activeConfiguration = config
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
@@ -40,8 +39,8 @@ func Init(config *configuration.Configuration) {
 // TODO
 // 1, Fly-on tesztelni a mount-ot és a scheduled futtatás
 // 2, Kicsinosítani a frontendet
-// 3, Go embed feature-ét használni, a templatek és a conf.json file-ra
-// 4, QR code possibility at login?
+// 3, QR code possibility at login? https://pkg.go.dev/github.com/skip2/go-qrcode#section-readme
+// 4, embeded-el a html templateket, akár ez alapján https://stackoverflow.com/questions/74975426/load-html-code-into-gin-framework-template
 
 func startPage(c *gin.Context) {
 	c.SetCookie("id", "", -1, "/", "localhost", false, true)
