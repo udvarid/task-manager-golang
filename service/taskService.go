@@ -18,12 +18,13 @@ func GetAllTasks(owner string) ([]model.MyTaskDto, []model.MyTaskDto) {
 			overDue = true
 		}
 		taskDto := model.MyTaskDto{
-			ID:       task.ID,
-			Task:     task.Task,
-			Deadline: task.Deadline,
-			DeadLStr: task.Deadline.Format(time.DateOnly),
-			Warning:  overDue,
-			Owner:    task.Owner,
+			ID:             task.ID,
+			Task:           task.Task,
+			Deadline:       task.Deadline,
+			DeadLStr:       task.Deadline.Format(time.DateOnly),
+			Warning:        overDue,
+			Owner:          task.Owner,
+			LastWarnedTime: task.LastWarnedTime,
 		}
 		taskDtos = append(taskDtos, taskDto)
 	}
@@ -63,4 +64,10 @@ func ProlongTask(taskId int, prolongDays int, owner string) {
 
 func AddTask(task model.NewTask, owner string) {
 	taskRepository.AddTask(task, owner)
+}
+
+func UpdateWarningDate(id int) {
+	task := taskRepository.GetTask(id)
+	task.LastWarnedTime = time.Now()
+	taskRepository.UpdateTask(id, task)
 }

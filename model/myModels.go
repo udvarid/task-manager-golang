@@ -3,19 +3,21 @@ package model
 import "time"
 
 type MyTask struct {
-	ID       int       `json:"id"`
-	Task     string    `json:"task"`
-	Deadline time.Time `json:"deadLine"`
-	Owner    string    `json:"owner"`
+	ID             int       `json:"id"`
+	Task           string    `json:"task"`
+	Deadline       time.Time `json:"deadLine"`
+	Owner          string    `json:"owner"`
+	LastWarnedTime time.Time `json:"lastWarnedTime"`
 }
 
 type MyTaskDto struct {
-	ID       int       `json:"id"`
-	Task     string    `json:"task"`
-	Deadline time.Time `json:"deadLine"`
-	DeadLStr string    `json:"deadLStr"`
-	Warning  bool      `json:"warning"`
-	Owner    string    `json:"owner"`
+	ID             int       `json:"id"`
+	Task           string    `json:"task"`
+	Deadline       time.Time `json:"deadLine"`
+	DeadLStr       string    `json:"deadLStr"`
+	Warning        bool      `json:"warning"`
+	Owner          string    `json:"owner"`
+	LastWarnedTime time.Time `json:"lastWarnedTime"`
 }
 
 type SessionWithTime struct {

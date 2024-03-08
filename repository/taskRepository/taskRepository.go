@@ -100,7 +100,7 @@ func AddTask(task model.NewTask, owner string) {
 	if err != nil {
 		log.Fatal("Not proper date format")
 	}
-	newTask := model.MyTask{Task: task.Task, Deadline: deadline, Owner: owner}
+	newTask := model.MyTask{Task: task.Task, Deadline: deadline, Owner: owner, LastWarnedTime: time.Now()}
 	db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Tasks"))
 		id, _ := b.NextSequence()
