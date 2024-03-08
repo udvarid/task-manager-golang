@@ -37,7 +37,7 @@ func Init(config *model.Configuration) {
 }
 
 // TODO
-// 1, Fly-on tesztelni a mount-ot és a scheduled futtatás
+// 1, egy nap csak 1szer küldjön egy taskra emlékeztetőt
 // 2, Kicsinosítani a frontendet
 // 3, QR code possibility at login? https://pkg.go.dev/github.com/skip2/go-qrcode#section-readme
 // 4, embeded-el a html templateket, akár ez alapján https://stackoverflow.com/questions/74975426/load-html-code-into-gin-framework-template
