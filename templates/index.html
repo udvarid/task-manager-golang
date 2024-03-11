@@ -1,74 +1,120 @@
-{{ template "header.html" .}}
-{{ template "menu.html" . }}
+<!doctype html>
+<html>
 
-  <h1>Your tasks!</h1>
+  <head>    
+    <title>{{ .title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <script async src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+  </head>
+
+  <body class="container">
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">
+            Logout
+          </a>
+          <a class="navbar-brand" href="/newTask">
+            Add new task
+          </a>
+        </div>
+      </div>
+    </nav>  
 
   <br>
-  <a>---------------------------Deadline reached!!!!!------------------------------------------------------</a>
   <br>
   {{range .tasksO }}
 
     <div>
 
-      <a>{{.Task}}</a>
-      <a>{{.DeadLStr}}</a>        
-      <form method="post" action="/prolong/{{.ID}}/1" class="inline">
-        <button type="submit" name="submit_param" value="submit_value" class="link-button">
-          Prolong with 1 day
-        </button>
-      </form>  
-      <form method="post" action="/prolong/{{.ID}}/7" class="inline">
-        <button type="submit" name="submit_param" value="submit_value" class="link-button">
-          Prolong with 7 days
-        </button>
-      </form>  
-      <form method="post" action="/prolong/{{.ID}}/30" class="inline">
-        <button type="submit" name="submit_param" value="submit_value" class="link-button">
-          Prolong with 30 days
-        </button>
-      </form>  
-      <form method="post" action="/delete/{{.ID}}" class="inline">
-        <button type="submit" name="submit_param" value="submit_value" class="link-button">
-          Delete it
-        </button>
-      </form>  
+      <span style="float:left;">
+        <a style="font-size:20px;color:red">{{.Task}}</a>  -  <a style="font-size:10px;color:red">{{.DeadLStr}}</a>      
+      </span>      
+      <span style="float:right;">
+        <form method="post" action="/prolong/{{.ID}}/1" class="inline">
+          <button style="font-size:10px;color:red" type="submit" name="submit_param" value="submit_value" class="link-button">
+            Prolong with 1 day
+          </button>
+        </form>  
+      </span>
+      <span style="float:right;">
+        <form method="post" action="/prolong/{{.ID}}/7" class="inline">
+          <button style="font-size:10px;color:red" type="submit" name="submit_param" value="submit_value" class="link-button">
+            Prolong with 7 days
+          </button>
+        </form>  
+      </span>
+      <span style="float:right;">
+        <form method="post" action="/prolong/{{.ID}}/30" class="inline">
+          <button style="font-size:10px;color:red" type="submit" name="submit_param" value="submit_value" class="link-button">
+            Prolong with 30 days
+          </button>
+        </form>  
+      </span>
+      <span style="float:right;">
+        <form method="post" action="/delete/{{.ID}}" class="inline">
+          <button style="font-size:10px;color:red" type="submit" name="submit_param" value="submit_value" class="link-button">
+            Delete it
+          </button>
+        </form>  
+      </span>
+      <br>
     </div>
+    <br>
+    
     
     
   {{end}}
 
-  <br>
-  <a>---------------------------Before deadline-------------------------------------------------------------</a>
-  <br>
-
+  
   {{range .tasksN }}
 
-    <div>
 
-      <a>{{.Task}}</a>
-      <a>{{.DeadLStr}}</a>    
+  <div>
+
+    <span style="float:left;">
+      <a style="font-size:20px;color:green">{{.Task}}</a>  -  <a style="font-size:10px;color:green">{{.DeadLStr}}</a>      
+    </span>      
+    <span style="float:right;">
       <form method="post" action="/prolong/{{.ID}}/1" class="inline">
-        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+        <button style="font-size:10px;color:green" type="submit" name="submit_param" value="submit_value" class="link-button">
           Prolong with 1 day
         </button>
       </form>  
+    </span>
+    <span style="float:right;">
       <form method="post" action="/prolong/{{.ID}}/7" class="inline">
-        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+        <button style="font-size:10px;color:green" type="submit" name="submit_param" value="submit_value" class="link-button">
           Prolong with 7 days
         </button>
       </form>  
+    </span>
+    <span style="float:right;">
       <form method="post" action="/prolong/{{.ID}}/30" class="inline">
-        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+        <button style="font-size:10px;color:green" type="submit" name="submit_param" value="submit_value" class="link-button">
           Prolong with 30 days
         </button>
       </form>  
+    </span>
+    <span style="float:right;">
       <form method="post" action="/delete/{{.ID}}" class="inline">
-        <button type="submit" name="submit_param" value="submit_value" class="link-button">
+        <button style="font-size:10px;color:green" type="submit" name="submit_param" value="submit_value" class="link-button">
           Delete it
         </button>
       </form>  
-    </div>
+    </span>
+    <br>
+  </div>
+  <br>
+  
     
     
   {{end}}
-{{ template "footer.html" .}}
+
+</body>
+
+</html>
