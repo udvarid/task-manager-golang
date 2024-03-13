@@ -15,7 +15,7 @@ func DoInitJob(config *model.Configuration) {
 		_, _, todayDay := time.Now().Date()
 		if lastWarnedDay != todayDay {
 			service.UpdateWarningDate(task.ID)
-			communicator.SendMessage(config, task.Owner, task.Task)
+			communicator.SendMessage(config, task.Owner, task.Task, task.DeadLStr)
 		}
 	}
 }

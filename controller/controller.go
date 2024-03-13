@@ -36,10 +36,6 @@ func Init(config *model.Configuration) {
 	router.Run()
 }
 
-// TODO
-// 1, QR code possibility at login? https://pkg.go.dev/github.com/skip2/go-qrcode#section-readme
-// 2, embeded-el a html templateket, akár ez alapján https://stackoverflow.com/questions/74975426/load-html-code-into-gin-framework-template
-
 func startPage(c *gin.Context) {
 	c.SetCookie("id", "", -1, "/", "localhost", false, true)
 	c.SetCookie("session", "", -1, "/", "localhost", false, true)

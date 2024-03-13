@@ -26,15 +26,17 @@ func SendMessageWithLink(config *model.Configuration, toAddress string, toLink s
 	}
 }
 
-func SendMessage(config *model.Configuration, toAddress string, task string) {
+func SendMessage(config *model.Configuration, toAddress string, task string, deadLine string) {
 	ret, err := verifier.Verify(toAddress)
 	if err != nil || !ret.Syntax.Valid {
-		sendNtfyMessage(toAddress, "Overdue: "+task)
+		sendNtfyMessage(toAddress, "Overdue: "+task+", Deadline: "+deadLine)
 	} else {
 		msg := []byte("To: " + toAddress + "\r\n" +
 			"Subject: Overdue task!\r\n" +
 			"\r\n" +
-			task)
+			task +
+			"\r\n" +
+			"Deadline: " + deadLine)
 		sendMail(config, toAddress, msg)
 	}
 }
