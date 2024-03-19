@@ -67,14 +67,16 @@ func GiveSession(id string) (string, error) {
 	return sessionGenerated, nil
 }
 
-func Validate(activeConfiguration *model.Configuration, id string, session string) bool {
+func Validate(activeConfiguration *model.Configuration, id string, session string, sendCommunicate bool) bool {
 	isValidatedInTime := false
 	if activeConfiguration.Environment == "local" {
 		fmt.Println("Local environment, validation process skipped")
 		isValidatedInTime = true
 	} else {
-		linkToSend := activeConfiguration.RemoteAddress + "checkin/" + id + "/" + session
-		communicator.SendMessageWithLink(activeConfiguration, id, linkToSend)
+		if sendCommunicate {
+			linkToSend := activeConfiguration.RemoteAddress + "checkin/" + id + "/" + session
+			communicator.SendMessageWithLink(activeConfiguration, id, linkToSend)
+		}
 
 		foundChecked := make(chan string)
 		timer := time.NewTimer(60 * time.Second)

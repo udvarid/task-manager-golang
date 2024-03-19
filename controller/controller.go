@@ -7,6 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	qrcode "github.com/skip2/go-qrcode"
+
 	"github.com/udvarid/task-manager-golang/authenticator"
 	"github.com/udvarid/task-manager-golang/model"
 	"github.com/udvarid/task-manager-golang/service"
@@ -18,6 +20,12 @@ var (
 
 type GetSession struct {
 	Id string `json:"id"`
+	Qr bool   `json:"qr"`
+}
+
+type GetIdAndSession struct {
+	Id      string `json:"id"`
+	Session string `json:"session"`
 }
 
 func Init(config *model.Configuration) {
@@ -26,7 +34,10 @@ func Init(config *model.Configuration) {
 	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", startPage)
+	router.GET("/qr/:id/:session", getQr)
+	router.GET("/qrvalid/:id/:session", qrvalid)
 	router.POST("/validate/", validate)
+	router.POST("/validateqr/", validateqr)
 	router.GET("/checkin/:id/:session", checkInTask)
 	router.GET("/task/", taskPage)
 	router.POST("/delete/:delete_id", deleteTask)
@@ -36,6 +47,14 @@ func Init(config *model.Configuration) {
 	router.Run()
 }
 
+// TODO
+// 1, QR code possibility at login? https://pkg.go.dev/github.com/skip2/go-qrcode#section-readme
+//   - startpageen legyen egy qr kód kérő checkbox
+//   - validate fv a checkboxtól függően vagy normálisan viselkedik, vagy meghívja a QR-es oldalt
+//   - QR-es oldal a kapott ID alapján sessiont generál, ebből és az ID-ból egy QR kódot, ezt kirajzolja és meghívja a validate fv-t
+//   - az authenticator.Validate ezesetben ne küldjön üzenetet
+// 2, embeded-el a html templateket, akár ez alapján https://stackoverflow.com/questions/74975426/load-html-code-into-gin-framework-template
+
 func startPage(c *gin.Context) {
 	c.SetCookie("id", "", -1, "/", "localhost", false, true)
 	c.SetCookie("session", "", -1, "/", "localhost", false, true)
@@ -44,19 +63,58 @@ func startPage(c *gin.Context) {
 	})
 }
 
+func qrvalid(c *gin.Context) {
+	id := c.Param("id")
+	session := c.Param("session")
+	c.HTML(http.StatusOK, "qr.html", gin.H{
+		"title":   "Home Page",
+		"id":      id,
+		"session": session,
+	})
+}
+
+func getQr(c *gin.Context) {
+	id := c.Param("id")
+	session := c.Param("session")
+	qrPath := activeConfiguration.RemoteAddress + "checkin/" + id + "/" + session
+	png, _ := qrcode.Encode(qrPath, qrcode.Highest, 256)
+	c.Data(http.StatusOK, "string", png)
+}
+
 func validate(c *gin.Context) {
 	var getSession GetSession
 	c.BindJSON(&getSession)
 	newSession, err := authenticator.GiveSession(getSession.Id)
 	if err != nil {
 		redirectTo(c, "/")
+		return
+	}
+	if getSession.Qr {
+		redirectTo(c, "/qrvalid/"+getSession.Id+"/"+newSession)
+		return
 	}
 
-	isValidatedInTime := authenticator.Validate(activeConfiguration, getSession.Id, newSession)
+	isValidatedInTime := authenticator.Validate(activeConfiguration, getSession.Id, newSession, true)
 
 	if isValidatedInTime {
 		c.SetCookie("id", getSession.Id, 3600, "/", activeConfiguration.RemoteAddress, false, true)
 		c.SetCookie("session", newSession, 3600, "/", activeConfiguration.RemoteAddress, false, true)
+		redirectTo(c, "/task")
+	} else {
+		redirectTo(c, "/")
+	}
+
+}
+
+func validateqr(c *gin.Context) {
+	var getIdAndSession GetIdAndSession
+	c.BindJSON(&getIdAndSession)
+
+	isValidatedInTime := authenticator.Validate(activeConfiguration, getIdAndSession.Id, getIdAndSession.Session, false)
+
+	if isValidatedInTime {
+		c.SetCookie("id", getIdAndSession.Id, 3600, "/", activeConfiguration.RemoteAddress, false, true)
+		c.SetCookie("session", getIdAndSession.Session, 3600, "/", activeConfiguration.RemoteAddress, false, true)
 		redirectTo(c, "/task")
 	} else {
 		redirectTo(c, "/")

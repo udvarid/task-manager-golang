@@ -22,28 +22,20 @@
       </div>
     </nav>
 
-<form id="myForm">
-  <input type="text" name="Id" id="id" placeholder="Your Id">  
-  <input type="checkbox" id="qr" name="qr">
-  <label for="qr">With QR code</label><br>
-  <button type="submit">Submit</button>
-</form>
+<img src="/qr/{{ .id }}/{{ .session }}" alt="PNG Image">
 
 <script>
-  document.getElementById("myForm").addEventListener("submit", function(event) {
-    event.preventDefault(); // Prevent default form submission
-  
-    // Get form data
+  window.onload = function() {
     const formData = {
-      id: document.getElementById("id").value,     
-      qr: document.getElementById("qr").checked,     
+      id: '{{.id}}',
+      session: '{{.session}}',
     };
     
     // Convert form data to JSON
     const jsonData = JSON.stringify(formData);
 
     // Send POST request
-    fetch("/validate/", {
+    fetch("/validateqr/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -61,10 +53,10 @@
     .catch(error => {      
       console.error("Error:", error);
     });
-  });
+
+  };
 </script>
 
-  
 
 </body>
 
